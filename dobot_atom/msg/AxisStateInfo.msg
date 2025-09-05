@@ -1,0 +1,14 @@
+uint8 servo_state
+uint16 error_code
+uint16 warn_code
+int32 pos_err_code
+int32 vel_err_code
+int32 torque_err_code
+uint8 node_state
+uint8 display_op_mode
+bool is_virtual
+uint8 mcu_temp
+uint8 mos_temp
+uint8 motor_temp
+uint8 bus_voltage
+uint16 software_version

@@ -1,0 +1,15 @@
+uint16 bms_state
+uint16 afe_state
+uint32 bms_alarms
+uint16 battery_level
+uint16 battery_health
+uint16 pcb_board_temp
+uint16 afe_chip_temp
+uint16 battery_now_current
+uint16[16] cells_voltage
+uint16 battery_pack_current_voltage
+uint16 battery_pack_io_voltage
+uint32 bms_work_time
+uint16 bms_hardware_version
+uint16 bms_software_version
+uint16 heartbeat

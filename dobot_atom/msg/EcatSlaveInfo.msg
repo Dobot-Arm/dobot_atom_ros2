@@ -1,0 +1,4 @@
+bool is_virtual
+uint8 slave_state
+uint16 error_code
+uint16 software_version

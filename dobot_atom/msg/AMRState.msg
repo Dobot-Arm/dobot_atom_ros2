@@ -1,0 +1,15 @@
+uint8 navigation_status
+float32[3] position
+float32 battery_level
+float32 battery_voltage
+float32 battery_current
+uint8 motion_status
+uint16 heartbeat
+bool emergency_stop_pressed
+bool enable_pressed
+bool obstacle_detected
+bool path_blocked
+bool low_battery
+uint8 mapping_status
+uint32[32] error_code
+uint32 task_id
