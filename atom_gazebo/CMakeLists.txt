@@ -7,18 +7,6 @@ endif()
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclpy REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(gazebo_ros REQUIRED)
-find_package(robot_state_publisher REQUIRED)
-find_package(xacro REQUIRED)
-find_package(ros2_control REQUIRED)
-find_package(ros2_controllers REQUIRED)
-find_package(controller_manager REQUIRED)
-find_package(gazebo_ros2_control REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -38,17 +26,15 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}/
 )
 
-# Install scripts
+# Install config files
 install(DIRECTORY
-  scripts
+  config
   DESTINATION share/${PROJECT_NAME}/
-  USE_SOURCE_PERMISSIONS
 )
 
-# Install Python scripts
+# Install scripts
 install(PROGRAMS
-  scripts/atom_wave_controller.py
+  scripts/control_arms.py
   DESTINATION lib/${PROJECT_NAME}
 )
-
 ament_package()

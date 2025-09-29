@@ -1,13 +1,18 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>atom_urdf</name>
+  <name>atom_rpc_bridge</name>
   <version>1.0.0</version>
-  <description>Dobot Atom机器人URDF模型文件包</description>
-  <maintainer email="dobot@dobot-robots.com">dobot</maintainer>
-  <license>Apache-2.0</license>
+  <description>Atom机器人RPC到DDS的中间层桥接包</description>
+  <maintainer email="developer@atom-robotics.com">Atom Robotics Team</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_srvs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

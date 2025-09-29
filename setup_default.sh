@@ -5,7 +5,7 @@ echo "Setup Dobot Atom robot ROS2 environment with default interface"
 source /opt/ros/humble/setup.bash
 
 # Source the atom_ros2 workspace
-source $HOME/atom_ros2/install/setup.bash
+source $HOME/atom_ros2_ws/install/setup.bash
 
 # Set DDS implementation to CycloneDDS for better performance
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp

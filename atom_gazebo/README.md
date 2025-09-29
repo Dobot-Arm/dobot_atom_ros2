@@ -1,186 +1,246 @@
-# Atom Gazebo Package
+# Atom Gazebo 仿真包
 
-This package provides Gazebo simulation support for the Atom humanoid robot, including launch files, controllers, and demonstration scripts.
+本包为 Dobot Atom 人形机器人提供完整的 Gazebo 仿真环境支持，包括机器人模型加载、控制器配置和仿真环境设置。
 
-## Package Contents
+## 🚀 功能特性
 
-### Launch Files
-- `atom_gazebo.launch.py`: Main launch file for Gazebo simulation with ros2_control
+- **完整仿真环境**: 提供 Gazebo 中的完整机器人仿真
+- **ROS2 Control 集成**: 支持标准化的机器人控制接口
+- **双臂控制**: 独立的左右手臂轨迹规划和执行
+- **灵活配置**: 支持全身和仅手臂的仿真模式
 
-### Configuration Files
-- `config/atom_controllers.yaml`: Controller configuration for ros2_control
+## 📁 文件结构
 
-### Scripts
-- `scripts/atom_wave_controller.py`: Python node for controlling robot waving motion
-- `scripts/test_wave.py`: Test script to demonstrate waving functionality
-
-### World Files
-- `worlds/empty.world`: Basic empty world for simulation
-
-## Dependencies
-
-Make sure you have the following packages installed:
-- `ros2_control`
-- `ros2_controllers` 
-- `gazebo_ros2_control`
-- `controller_manager`
-- `gazebo_ros`
-- `robot_state_publisher`
-- `joint_state_publisher`
-- `xacro`
-- `atom_urdf` (contains the robot model)
-
-## Usage
-
-### 1. Build the Package
-
-```bash
-cd ~/your_ros2_workspace
-colcon build --packages-select atom_gazebo
-source install/setup.bash
+```
+atom_gazebo/
+├── CMakeLists.txt              # 构建配置文件
+├── package.xml                 # 包依赖声明
+├── launch/                     # 启动文件目录
+│   ├── atom_gazebo.launch.py   # 完整仿真启动文件
+│   └── atom_arms_only.launch.py # 仅手臂仿真启动文件
+├── config/                     # 配置文件目录
+│   └── atom_moveit.rviz        # MoveIt RViz 配置
+└── scripts/                    # 控制脚本目录
+    └── control_arms.py         # 双臂控制脚本
 ```
 
-### 2. Launch Gazebo Simulation
+## 🎯 快速开始
+
+### 1. 启动仿真
+
+#### 完整机器人仿真
 
 ```bash
 ros2 launch atom_gazebo atom_gazebo.launch.py
 ```
 
-This will:
-- Start Gazebo with the empty world
-- Load the Atom robot model
-- Start the robot state publisher
-- Load and activate the ros2_control controllers
-
-### 3. Control the Robot
-
-#### Manual Joint Control
-
-You can control individual joints using ros2 topic commands:
+#### 仅手臂仿真
 
 ```bash
-# Control arm joints
-ros2 topic pub /arm_position_controller/commands std_msgs/msg/Float64MultiArray "data: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.5, 0.0, 1.5, 0.0, 0.0]"
-
-# Control leg joints
-ros2 topic pub /leg_position_controller/commands std_msgs/msg/Float64MultiArray "data: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]"
-
-# Control head joints
-ros2 topic pub /head_position_controller/commands std_msgs/msg/Float64MultiArray "data: [0.0, 0.0]"
+ros2 launch atom_gazebo atom_arms_only.launch.py
 ```
 
-#### Waving Motion Demo
+## 🔧 启动文件说明
 
-Run the waving controller:
+### atom_gazebo.launch.py
+
+完整的 Gazebo 仿真启动文件，包含：
+
+- **参数配置**:
+
+  - `use_sim_time`: 使用仿真时间（默认: true）
+  - `gui`: 是否显示 Gazebo GUI（默认: true）
+  - `headless`: 无头模式运行（默认: false）
+- **功能模块**:
+
+  - Gazebo 世界环境加载
+  - 机器人 URDF 模型加载
+  - Robot State Publisher 启动
+  - ROS2 Control 控制器管理
+
+### atom_arms_only.launch.py
+
+仅手臂部分的仿真启动文件，适用于：
+
+- 手臂控制算法开发
+- 轻量级仿真测试
+- 运动规划验证
+
+## 🎮 控制脚本
+
+### control_arms.py
+
+双臂控制脚本，提供以下功能：
+
+#### 主要特性
+
+- **双臂独立控制**: 支持左右手臂独立轨迹规划
+- **轨迹插值**: 自动进行平滑轨迹插值
+- **状态监控**: 实时监控手臂执行状态
+- **错误处理**: 完善的错误检测和恢复机制
+
+#### 使用方法
 
 ```bash
-ros2 run atom_gazebo atom_wave_controller.py
+# 启动仿真后，运行控制脚本
+ros2 run atom_gazebo control_arms.py
 ```
 
-Or test the waving motion:
+#### 控制接口
+
+脚本通过以下 Action 接口控制手臂：
+
+- `/left_arm_controller/follow_joint_trajectory`
+- `/right_arm_controller/follow_joint_trajectory`
+
+#### 预定义动作
+
+脚本包含以下预定义动作序列：
+
+1. **上升动作**: 手臂向上运动
+2. **下降动作**: 手臂向下运动
+3. **复位动作**: 返回初始位置
+
+## ⚙️ 配置文件
+
+### atom_moveit.rviz
+
+MoveIt 集成的 RViz 配置文件，包含：
+
+- **显示配置**:
+
+  - 机器人模型显示
+  - 运动规划可视化
+  - 轨迹显示
+  - 碰撞检测可视化
+- **交互工具**:
+
+  - 交互式标记器
+  - 运动规划面板
+  - 场景规划工具
+
+## 💡 使用示例
+
+### 示例 1: 基本仿真启动
 
 ```bash
-ros2 run atom_gazebo test_wave.py
+# 终端 1: 启动 Gazebo 仿真
+ros2 launch atom_gazebo atom_gazebo.launch.py
+
+# 终端 2: 启动 RViz 可视化
+ros2 launch dobot_atom_rviz atom_rviz.launch.py
+
+# 终端 3: 运行控制脚本
+ros2 run atom_gazebo control_arms.py
 ```
 
-### 4. Monitor Robot State
+### 示例 2: 无头模式仿真
 
 ```bash
-# View joint states
-ros2 topic echo /joint_states
+# 无 GUI 模式启动，适用于服务器环境
+ros2 launch atom_gazebo atom_gazebo.launch.py gui:=false headless:=true
+```
 
-# List available controllers
+### 示例 3: 手臂控制测试
+
+```bash
+# 启动仅手臂仿真
+ros2 launch atom_gazebo atom_arms_only.launch.py
+
+# 检查控制器状态
 ros2 control list_controllers
 
-# Check controller status
-ros2 control list_hardware_interfaces
+# 手动发送轨迹命令
+ros2 topic pub /left_arm_controller/follow_joint_trajectory/goal ...
 ```
 
-## Controller Configuration
+## 🔍 话题和服务
 
-The robot uses the following controllers:
+### 主要话题
 
-- **joint_state_broadcaster**: Publishes joint states to `/joint_states`
-- **arm_position_controller**: Controls all arm joints (left + right)
-- **leg_position_controller**: Controls all leg joints (left + right)
-- **head_position_controller**: Controls head yaw and pitch joints
+- `/joint_states`: 关节状态信息
+- `/robot_description`: 机器人模型描述
+- `/left_arm_controller/follow_joint_trajectory/goal`: 左臂轨迹目标
+- `/right_arm_controller/follow_joint_trajectory/goal`: 右臂轨迹目标
 
-### Joint Order for Controllers
+### 控制器服务
 
-#### Arm Controller (14 joints):
-1. uidx_l_arm_joint1 (left shoulder pitch)
-2. left_shoulder_roll_joint
-3. left_shoulder_yaw_joint
-4. uidx_l_arm_joint2 (left elbow pitch)
-5. left_elbow_roll_joint
-6. left_wrist_pitch_joint
-7. left_wrist_yaw_joint
-8. uidx_r_arm_joint1 (right shoulder pitch)
-9. right_shoulder_roll_joint
-10. right_shoulder_yaw_joint
-11. uidx_r_arm_joint2 (right elbow pitch)
-12. right_elbow_roll_joint
-13. right_wrist_pitch_joint
-14. right_wrist_yaw_joint
+- `/controller_manager/list_controllers`: 列出所有控制器
+- `/controller_manager/load_controller`: 加载控制器
+- `/controller_manager/switch_controller`: 切换控制器状态
 
-#### Leg Controller (12 joints):
-1. leg_l1_joint through leg_l6_joint (left leg)
-2. leg_r1_joint through leg_r6_joint (right leg)
+## 🐛 故障排除
 
-#### Head Controller (2 joints):
-1. head_yaw_joint
-2. head_pitch_joint
+### 常见问题
 
-## Troubleshooting
-
-### Controllers Not Loading
-
-If controllers fail to load, check:
+#### 1. Gazebo 启动失败
 
 ```bash
-# Check if Gazebo is running
-ps aux | grep gazebo
+# 检查 Gazebo 版本
+gazebo --version
 
-# Check controller manager
-ros2 node list | grep controller_manager
+# 重新安装 Gazebo
+sudo apt install --reinstall gazebo
+```
 
-# Manually load controllers
+#### 2. 控制器加载失败
+
+```bash
+# 检查控制器状态
+ros2 control list_controllers
+
+# 手动加载控制器
 ros2 control load_controller joint_state_broadcaster
 ros2 control set_controller_state joint_state_broadcaster active
 ```
 
-### Robot Not Moving
+#### 3. 机器人模型不显示
 
-1. Verify controllers are active:
-   ```bash
-   ros2 control list_controllers
-   ```
+```bash
+# 检查 robot_description 话题
+ros2 topic echo /robot_description
 
-2. Check joint limits in the URDF/XACRO files
+# 检查 TF 树
+ros2 run tf2_tools view_frames
+```
 
-3. Verify topic names:
-   ```bash
-   ros2 topic list | grep controller
-   ```
+#### 4. 轨迹执行失败
 
-### Gazebo Performance Issues
+```bash
+# 检查 Action 服务器状态
+ros2 action list
 
-- Reduce physics update rate in the world file
-- Close unnecessary GUI panels
-- Use headless mode: `ros2 launch atom_gazebo atom_gazebo.launch.py gui:=false`
+# 查看错误日志
+ros2 topic echo /left_arm_controller/follow_joint_trajectory/feedback
+```
 
-## Development
+### 性能优化
 
-### Adding New Controllers
+#### 1. Gazebo 性能优化
 
-1. Update `config/atom_controllers.yaml`
-2. Add controller loading in `launch/atom_gazebo.launch.py`
-3. Update dependencies in `package.xml` and `CMakeLists.txt`
+- 关闭不必要的插件
+- 降低物理引擎更新频率
+- 使用简化的碰撞模型
 
-### Creating Custom Motions
+#### 2. 控制器优化
 
-Use `atom_wave_controller.py` as a template for creating new motion controllers.
+- 调整轨迹插值参数
+- 优化控制器更新频率
+- 使用适当的 PID 参数
 
-## License
+## 📚 扩展开发
 
-This package is licensed under the Apache License 2.0.
+### 添加新的控制器
+
+1. 在 `atom_urdf/config/atom_controllers.yaml` 中定义控制器
+2. 修改启动文件加载新控制器
+3. 编写相应的控制脚本
+
+### 自定义仿真环境
+
+1. 创建新的世界文件（.world）
+2. 修改启动文件中的世界文件路径
+3. 添加环境物体和传感器
+
+**维护者**: Dobot_futingxing
+**最后更新**: 2025-09-02

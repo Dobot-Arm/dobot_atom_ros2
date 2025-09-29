@@ -4,7 +4,7 @@
   <name>atom_gazebo</name>
   <version>1.0.0</version>
   <description>Gazebo simulation package for Atom humanoid robot</description>
-  <maintainer email="developer@dobot.cc">Dobot Developer</maintainer>
+  <maintainer email="dobot@dobot-robots.com">dobot</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -41,6 +41,8 @@
   <!-- Related packages -->
   <depend>atom_urdf</depend>
   <depend>dobot_atom</depend>
+  <depend>control_msgs</depend>
+  <depend>trajectory_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

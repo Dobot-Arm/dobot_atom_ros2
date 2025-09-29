@@ -31,12 +31,6 @@
 
 ### 控制程序
 
-5. **头部控制程序** (`atom_head_controller`)
-
-   - 订阅话题：`/upper/state`
-   - 发布话题：`/upper/cmd`, `/set/fsm/id`, `/switch/upper/control`
-   - 功能：控制机器人头部进行摇头和点头动作
-   - 模式：摇头 → 点头 → 停止 → 循环
 6. **全身轨迹跟踪控制器** (`atom_full_body_trajectory_controller`)
 
    - 订阅话题：`/lower/state`, `/upper/state`, `/hands/state`
@@ -48,18 +42,7 @@
      - 可配置PID参数
      - 实时轨迹跟踪（10ms控制周期）
      - 循环播放轨迹
-7. **速度控制器** (`atom_velocity_controller`)
-
-   - 订阅话题：`/fsm/status`, `/cmd_vel_input`
-   - 发布话题：`/set/fsm/id`, `/cmd_vel`
-   - 功能：机器人速度控制和状态机管理
-   - 特性：
-     - FSM状态管理（支持301/302行走模式）
-     - 速度命令发送（前后、左右、旋转）
-     - 演示序列自动执行
-     - 安全检查（FSM状态验证）
-     - 支持命令行参数控制
-8. **关节数据记录器** (`atom_joint_recorder`)
+7. **关节数据记录器** (`atom_joint_recorder`)
 
    - 订阅话题：`/lower/state`, `/upper/state`, `/hands/state`
    - 功能：记录机器人所有关节角度数据到文件
@@ -69,6 +52,17 @@
      - 带时间戳的数据格式
      - 详细的文件头信息
      - 实时进度显示
+8. **灵巧手控制程序** (`atom_dexterous_hands_controller`)
+
+   - 发布话题：`/hands/cmd`
+   - 功能：控制机器人灵巧手进行抓握和松开动作
+   - 特性：
+     - 双手同步控制（左右手各6个自由度）
+     - 平滑运动轨迹（缓动函数优化）
+     - 智能时序控制（拇指延迟/提前动作）
+     - 自动状态切换（抓握 ↔ 松开，5秒间隔）
+     - 多线程安全设计
+     - 符合手指角度限制范围
 
 ## 编译和运行
 
@@ -85,8 +79,7 @@
 ### 编译
 
 ```bash
-cd /path/to/your/ros2_workspace
-colcon build --packages-select atom_control_examples
+colcon build 
 source install/setup.bash
 ```
 
@@ -109,23 +102,8 @@ ros2 run atom_control_examples hands_state_reader
 ### 运行控制程序
 
 ```bash
-# 头部控制程序
-ros2 run atom_control_examples atom_head_controller
-
-# 全身轨迹跟踪控制器
-ros2 run atom_control_examples atom_full_body_trajectory_controller
-
-# 速度控制器
-ros2 run atom_control_examples atom_velocity_controller
-
-# 关节数据记录器
-ros2 run atom_control_examples atom_joint_recorder
-
-# 带参数的速度控制器示例
-ros2 run atom_control_examples atom_velocity_controller --ros-args -p duration:=30.0 -p delay:=2.0
-
-# 带参数的关节记录器示例
-ros2 run atom_control_examples atom_joint_recorder --ros-args -p record_duration:=10.0 -p record_frequency:=100.0 -p start_delay:=3.0
+# 灵巧手控制程序
+ros2 run atom_control_examples atom_dexterous_hands_controller
 ```
 
 ## 话题说明
@@ -164,26 +142,14 @@ ros2 run atom_control_examples atom_joint_recorder --ros-args -p record_duration
 ### 机器人关节布局
 
 - **下肢关节**：12个关节（左右腿各6个）
-- **上肢关节**：17个关节（左右臂各6个+头部2个+躯干3个）
+- **上肢关节**：17个关节（左右臂各7个+头部2个+躯干1个）
 - **灵巧手关节**：12个关节（左右手各6个）
-
-### 头部关节（索引14-15）
-
-- 关节14：头部偏航（左右转动）
-- 关节15：头部俯仰（上下点头）
 
 ### 关节限位
 
 详细的关节限位信息请参考 `Atom关节顺序名称与关节限位.md` 文件。
 
 ## 程序参数
-
-### 头部控制参数
-
-- `SHAKE_AMPLITUDE`: 摇头幅度（弧度）
-- `NOD_AMPLITUDE`: 点头幅度（弧度）
-- `CONTROL_FREQUENCY`: 控制频率（Hz）
-- `MODE_DURATION`: 每种模式持续时间（秒）
 
 ### 轨迹控制参数
 
@@ -193,17 +159,21 @@ ros2 run atom_control_examples atom_joint_recorder --ros-args -p record_duration
 - `leg_kp`, `leg_kd`: 腿部PID参数
 - `arm_kp`, `arm_kd`: 手臂PID参数
 
-### 速度控制参数
-
-- `duration`: 演示持续时间
-- `delay`: 启动延迟时间
-
 ### 记录器参数
 
 - `record_duration`: 记录持续时间
 - `record_frequency`: 记录频率
 - `start_delay`: 开始延迟
 - `output_file`: 输出文件路径
+
+### 灵巧手控制参数
+
+- `STATE_SWITCH_INTERVAL`: 状态切换间隔（秒）
+- `MOTION_STEPS`: 动作总步数
+- `STEP_DELAY_MS`: 步间延迟（毫秒）
+- `THUMB_DELAY_STEPS`: 抓握时拇指延迟步数
+- `THUMB_LEAD_STEPS`: 松开时拇指提前完成步数
+- `CONTROL_FREQUENCY`: 控制频率（Hz）
 
 ### 信息打印控制
 
@@ -246,12 +216,6 @@ ros2 topic info /upper/state
 # 监听话题数据
 ros2 topic echo /upper/state
 
-# 查看节点信息
-ros2 node list
-ros2 node info /atom_head_controller
-
-# 查看参数
-ros2 param list /atom_velocity_controller
 ```
 
 ## 扩展开发
@@ -269,12 +233,3 @@ ros2 param list /atom_velocity_controller
 2. 订阅相应的状态话题
 3. 实现状态信息的解析和显示
 4. 在 `CMakeLists.txt` 中添加新的可执行文件
-
-## 技术特点
-
-- **模块化设计**：每个功能独立为单独的程序
-- **实时性能**：使用高频率控制循环
-- **安全机制**：包含多重安全检查
-- **易于扩展**：清晰的代码结构便于二次开发
-- **详细日志**：提供丰富的调试信息
-- **参数化配置**：支持运行时参数调整

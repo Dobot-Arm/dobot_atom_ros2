@@ -27,18 +27,18 @@ ament_target_dependencies(main_nodes_state_reader rclcpp dobot_atom std_msgs)
 add_executable(hands_state_reader src/hands_state_reader.cpp)
 ament_target_dependencies(hands_state_reader rclcpp dobot_atom std_msgs)
 
-add_executable(atom_head_controller src/atom_head_controller.cpp)
-ament_target_dependencies(atom_head_controller rclcpp dobot_atom std_msgs)
-
 # Add new SDK-ported executables
 add_executable(atom_full_body_trajectory_controller src/atom_full_body_trajectory_controller.cpp)
 ament_target_dependencies(atom_full_body_trajectory_controller rclcpp dobot_atom std_msgs)
 
-add_executable(atom_velocity_controller src/atom_velocity_controller.cpp)
-ament_target_dependencies(atom_velocity_controller rclcpp dobot_atom std_msgs geometry_msgs)
-
 add_executable(atom_joint_recorder src/atom_joint_recorder.cpp)
 ament_target_dependencies(atom_joint_recorder rclcpp dobot_atom std_msgs)
+
+add_executable(atom_dexterous_hands_controller src/atom_dexterous_hands_controller.cpp)
+ament_target_dependencies(atom_dexterous_hands_controller rclcpp dobot_atom std_msgs)
+
+# Add atom_rpc_bridge subdirectory
+add_subdirectory(atom_rpc_bridge)
 
 # Install executables
 install(TARGETS
@@ -46,10 +46,9 @@ install(TARGETS
   upper_state_reader
   main_nodes_state_reader
   hands_state_reader
-  atom_head_controller
   atom_full_body_trajectory_controller
-  atom_velocity_controller
   atom_joint_recorder
+  atom_dexterous_hands_controller
   DESTINATION lib/${PROJECT_NAME}
 )
 

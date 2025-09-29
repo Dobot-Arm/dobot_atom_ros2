@@ -1,6 +1,9 @@
 # Dobot Atom Robot ROS2 Support Package
 
-This project provides complete ROS2 support for the Dobot Atom humanoid robot, including robot models, simulation environment, control interfaces, and example programs.
+This project provides complete ROS2 support for the Dobot Atom humanoid robot, including robot models, simulation environments, control interfaces, and example programs.
+
+**Update Date**: 2025-9-2
+**Maintainer**: dobot_futingxing
 
 ## 📋 Table of Contents
 
@@ -8,14 +11,13 @@ This project provides complete ROS2 support for the Dobot Atom humanoid robot, i
 - [Installation Instructions](#installation-instructions)
 - [Quick Start](#quick-start)
 - [Package Description](#package-description)
-- [Usage Examples](#usage-examples)
 - [Troubleshooting](#troubleshooting)
 
 ## 🚀 Environment Configuration
 
 ### System Requirements
 
-Tested systems and ROS2 versions:
+System and ROS2 versions:
 
 | System       | ROS2 Version |
 | ------------ | ------------ |
@@ -24,25 +26,84 @@ Tested systems and ROS2 versions:
 
 ### Dependency Installation
 
-#### 1. Install ROS2
+#### **Install ROS2**
 
-Note: This installation method is for reference only. If installation errors occur, please search for tutorials and install by yourself.
-
-Using ROS2 Humble as an example (recommended):
+##### **1. Set Encoding**
 
 ```bash
-# Add ROS2 apt repository
+sudo apt update && sudo apt install locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+```
+
+##### **2. Add Sources**
+
+```bash
 sudo apt update && sudo apt install curl gnupg lsb-release
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+```
 
-# Install ROS2 Humble
+##### **3. Install ROS2**
+
+```bash
 sudo apt update
+sudo apt upgrade
 sudo apt install ros-humble-desktop
+```
 
-# Set environment variables
+##### **4. Set Environment Variables**
+
+```bash
 source /opt/ros/humble/setup.bash
-echo " source /opt/ros/humble/setup.bash" >> ~/.bashrc
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+```
+
+##### **5. Turtlesim Simulation Example**
+
+Start two terminals and run the following commands respectively:
+
+```bash
+ros2 run turtlesim turtlesim_node
+ros2 run turtlesim turtle_teleop_key
+```
+
+- The first command will start a turtle simulator with a blue background.
+- The second command will start a keyboard control node, using the "up, down, left, right" keys on the keyboard to control the turtle's movement.
+
+![turtlesim](/image/image2544.png)
+
+---
+
+#### **Gazebo Installation**
+
+##### **Installation**
+
+```bash
+sudo apt install ros-humble-gazebo-*
+```
+
+##### **Add Environment Variables**
+
+```bash
+echo "source /usr/share/gazebo/setup.bash" >> ~/.bashrc
+```
+
+##### **Run**
+
+```bash
+ros2 launch gazebo_ros gazebo.launch.py
+```
+
+---
+
+#### **MoveIt Installation**
+
+##### **Installation**
+
+```bash
+sudo apt-get install ros-humble-moveit
 ```
 
 #### 2. Install Dependencies
@@ -50,12 +111,6 @@ echo " source /opt/ros/humble/setup.bash" >> ~/.bashrc
 ```bash
 # ROS2 control related
 sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
-sudo apt install ros-humble-gazebo-*
-sudo apt-get install ros-humble-moveit
-
-# Set environment variables
-echo "source /usr/share/gazebo/setup.bash" >> ~/.bashrc
-
 # URDF and visualization tools
 sudo apt install ros-humble-urdf ros-humble-xacro
 sudo apt install ros-humble-robot-state-publisher ros-humble-joint-state-publisher
@@ -65,8 +120,9 @@ sudo apt install ros-humble-joint-state-publisher-gui
 sudo apt install python3-colcon-common-extensions
 sudo apt install python3-rosdep python3-vcstool
 
-# DDS implementation (optional, for better performance)
-sudo apt install ros-humble-rmw-cyclonedds-cpp
+# DDS implementation
+sudo apt install ros-humble-rmw-cyclonedx-cpp
+
 ```
 
 ## 📦 Installation Instructions
@@ -79,7 +135,7 @@ mkdir -p ~/atom_ros2_ws/src
 cd ~/atom_ros2_ws/src
 
 # Clone this repository
-git clone <your-repository-url> atom_ros2
+git clone https://github.com/Dobot-Arm/dobot_atom_ros2.git
 ```
 
 ### 2. Install Dependencies
@@ -87,7 +143,7 @@ git clone <your-repository-url> atom_ros2
 ```bash
 cd ~/atom_ros2_ws
 
-# Initialize rosdep (if first time using)
+# Initialize rosdep (if using for the first time)
 sudo rosdep init
 rosdep update
 
@@ -121,41 +177,58 @@ source ~/setup_local.sh
 # 3. Default configuration
 source ~/setup_default.sh
 
-# For permanent effect, add to environment variables
+# For permanent effect, write to environment variables
 sudo gedit ~/.bashrc
 ```
 
+## 🔧 Configuration Instructions
+
+### Network Configuration
+
+If connecting to a real robot, network interface configuration is required:
+
+1. Set network segment to 192.168.8.xx:
+   ![rviz](/image/IP.jpg)
+2. View network interface:
+
+```bash
+ifconfig
+# or
+ip addr show
+```
+
+3. Modify the network interface name in `setup.sh`:
+
+```bash
+# Edit configuration file
+gedit ~/setup.sh
+
+# Modify "eth0" in this line to the actual network interface name
+export CYCLONEDDS_URI='<CycloneDDS><Domain><General><Interfaces>
+    <NetworkInterface name="eth0" priority="default" multicast="default" />
+</Interfaces></General></Domain></CycloneDDS>'
+```
+
+### Connection Test
+
+After completing the above configuration, restart `ros2 daemon`: `ros2 daemon stop` then execute `ros2 daemon start`
+
+```bash
+source ~/setup.sh
+ros2 topic list
+```
+
+You can see the following topics:
+
+![topic](/image/topic.jpg)
+
+Open terminal and view any topic: ros2 topic echo /xxxx. If there is data, it means communication is normal, for example:
+
+![topic_info.](/image/topic_info.jpg)
+
 ## 🎯 Quick Start
 
-### 1. Launch Gazebo Simulation
-
-```bash
-# Set environment
-source ~/atom_ros2_ws/install/setup.bash
-source ~/setup_local.sh
-
-# Launch Gazebo simulation
-ros2 launch atom_gazebo atom_gazebo.launch.py
-```
-
-### 2. Launch RViz Visualization
-
-```bash
-# New terminal
-source ~/atom_ros2_ws/install/setup.bash
-ros2 launch atom_urdf display.launch.py
-```
-
-### 3. Test Waving Motion
-
-```bash
-# New terminal
-source ~/atom_ros2_ws/install/setup.bash
-ros2 run atom_gazebo atom_wave_controller.py
-
-# Or run test script
-ros2 run atom_gazebo test_wave.py
-```
+Please refer to README.md in each functional module
 
 ## 📁 Package Description
 
@@ -163,18 +236,21 @@ ros2 run atom_gazebo test_wave.py
 
 - **Function**: URDF/XACRO model definition for Atom robot
 - **Contents**:
-  - `urdf/atom.urdf`: Main robot model file in URDF format
-  - `urdf/atom.xacro`: Main robot model file in XACRO format
-  - `urdf/atom_gazebo.xacro`: Gazebo simulation configuration
+  - `urdf/atom.urdf`: Main robot model file containing complete robot geometric structure and joint definitions
+  - `urdf/atom.xacro`: Parameterized robot model file supporting configurable robot description
+  - `urdf/atom_gazebo.xacro`: Gazebo simulation specific configuration including physical properties and sensor definitions
+  - `meshes/`: Robot 3D mesh files for visualization and collision detection
+  - `config/`: Robot parameter configuration files
 
 ### atom_gazebo
 
-- **Function**: Gazebo simulation support
+- **Function**: Gazebo simulation environment support providing complete robot simulation functionality
 - **Contents**:
-  - `launch/atom_gazebo.launch.py`: Gazebo simulation launch file
-  - `config/atom_controllers.yaml`: Controller configuration
-  - `scripts/atom_wave_controller.py`: Waving motion controller
-  - `scripts/test_wave.py`: Waving test script
+  - `launch/atom_gazebo.launch.py`: Complete Gazebo simulation launch file including world environment and robot loading
+  - `launch/atom_arms_only.launch.py`: Arms-only simulation launch file
+  - `config/atom_moveit.rviz`: MoveIt integrated RViz configuration file
+  - `scripts/control_arms.py`: Dual arm control script supporting trajectory planning and execution
+  - Supports ROS2 Control framework providing standardized robot control interfaces
 
 ### dobot_atom
 
@@ -201,133 +277,6 @@ ros2 run atom_gazebo test_wave.py
   - Various control algorithm examples
   - Motion planning examples
   - Sensor data processing examples
-
-## 🎮 Usage Examples
-
-### Simulation Joint Control
-
-```bash
-# Control arm joints
-ros2 topic pub /arm_position_controller/commands std_msgs/msg/Float64MultiArray \
-  "data: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.5, 0.0, 1.5, 0.0, 0.0]"
-
-# Control leg joints
-ros2 topic pub /leg_position_controller/commands std_msgs/msg/Float64MultiArray \
-  "data: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]"
-
-# Control head joints
-ros2 topic pub /head_position_controller/commands std_msgs/msg/Float64MultiArray \
-  "data: [0.0, 0.0]"
-```
-
-### Status Monitoring
-
-```bash
-# View joint states
-ros2 topic echo /joint_states
-
-# View available controllers
-ros2 control list_controllers
-
-# View topic list
-ros2 topic list
-```
-
-### Custom Motion
-
-```python
-#!/usr/bin/env python3
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import Float64MultiArray
-
-class CustomMotionController(Node):
-    def __init__(self):
-        super().__init__('custom_motion_controller')
-        self.arm_pub = self.create_publisher(
-            Float64MultiArray, 
-            '/arm_position_controller/commands', 
-            10
-        )
-  
-    def move_arms(self, positions):
-        msg = Float64MultiArray()
-        msg.data = positions
-        self.arm_pub.publish(msg)
-
-def main():
-    rclpy.init()
-    controller = CustomMotionController()
-  
-    # Custom arm positions
-    arm_positions = [0.0] * 14  # 14 arm joints
-    arm_positions[8] = -1.0     # Raise right shoulder
-    arm_positions[11] = 1.5     # Bend right elbow
-  
-    controller.move_arms(arm_positions)
-    rclpy.spin_once(controller)
-  
-    controller.destroy_node()
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
-```
-
-## 🔧 Configuration Instructions
-
-### Network Configuration
-
-If connecting to a real robot, network interface configuration is required:
-
-   1. Set network segment to 192.168.8.xx:
-   ![rviz](/image/IP.jpg)
-
-2. Check network interface:
-
-```bash
-ifconfig
-# or
-ip addr show
-```
-
-3. Modify network interface name in `setup.sh`:
-
-```bash
-# Edit configuration file
-gedit ~/setup.sh
-
-# Modify "eth0" in this line to the actual network interface name
-export CYCLONEDDS_URI='<CycloneDDS><Domain><General><Interfaces>
-    <NetworkInterface name="eth0" priority="default" multicast="default" />
-</Interfaces></General></Domain></CycloneDDS>'
-```
-
-### Connection Test
-
-After completing the above configuration, restart the `ros2 daemon`: `ros2 daemon stop` then execute `ros2 daemon start`
-
-```bash
-source ~/setup.sh
-ros2 topic list
-```
-
-You can see the following topics:
-
-![topic](/image/topic.jpg)
-
-Open a terminal and check any topic: ros2 topic echo /xxxx. If there is data, communication is normal. For example:
-
-![topic_info.](/image/topic_info.jpg)
-
-### Virtual Control Configuration
-
-Configuration file is located at `atom_gazebo/config/atom_controllers.yaml`, including:
-
-- `joint_state_broadcaster`: Joint state broadcaster
-- `arm_position_controller`: Arm position controller
-- `leg_position_controller`: Leg position controller
-- `head_position_controller`: Head position controller
 
 ## 🐛 Troubleshooting
 
@@ -382,9 +331,8 @@ colcon build
 - Reduce physics engine update frequency
 - Use headless mode: `gui:=false`
 
-#### 2. DDS Optimization
+#### 2. DDS Optimization Configure Appropriate Network Interface
 
-- Configure appropriate network interface
 - Adjust DDS domain ID
 
 ## 📚 References
@@ -394,21 +342,14 @@ colcon build
 - [ros2_control Documentation](https://control.ros.org/)
 - [URDF Tutorial](http://wiki.ros.org/urdf/Tutorials)
 
-## 📄 License
-
-This project is licensed under the Apache License 2.0.
-
 ## 📞 Support
 
-If you have any questions, please:
+If you have issues, please:
 
 1. Check the troubleshooting section of this README
 2. Search existing Issues
 3. Create a new Issue with detailed information
 
-**Update Date**: 2025-9-2
-**Maintainer**: dobot_futingxing
-
 ---
 
-**Note**: Please adjust configuration files and example code according to the actual robot hardware interface and communication protocol.
+**Note**: Please adjust configuration files and example code according to actual robot hardware interfaces and communication protocols.

@@ -4,7 +4,7 @@
   <name>dobot_atom_rviz</name>
   <version>1.0.0</version>
   <description>Dobot Atom机器人RViz可视化包</description>
-  <maintainer email="futingxing@dobot.cc">futingxing</maintainer>
+  <maintainer email="dobot@dobot-robots.com">dobot</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
