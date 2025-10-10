@@ -3,7 +3,7 @@
 本项目为 Dobot Atom 人形机器人提供完整的 ROS2 支持，包括机器人模型、仿真环境、控制接口和示例程序。
 
 **更新日期**: 2025-9-2
-**维护**: dobot_futingxing
+**开发及维护**: dobot_futingxing
 
 ## 📋 目录
 

@@ -3,7 +3,7 @@
 This project provides complete ROS2 support for the Dobot Atom humanoid robot, including robot models, simulation environments, control interfaces, and example programs.
 
 **Update Date**: 2025-9-2
-**Maintainer**: dobot_futingxing
+**Development and maintenance**: dobot_futingxing
 
 ## 📋 Table of Contents
 

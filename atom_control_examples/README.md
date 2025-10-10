@@ -70,7 +70,7 @@
 
 确保以下依赖项已安装：
 
-- ROS2 (Humble/Iron/Rolling)
+- ROS2 (Humble)
 - rclcpp
 - dobot_atom (消息包)
 - std_msgs
