@@ -40,6 +40,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         "msg/HandsCmd.msg"
         "msg/AMRState.msg"
         "msg/AMRCommand.msg"
+        "msg/AMREventStatus.msg"
+        "msg/AMRBasicStatus.msg"
+        "msg/JoystickValue.msg"
+        "msg/RemoteControl.msg"
+        "msg/EmergencyState.msg"
   DEPENDENCIES geometry_msgs
 )
 

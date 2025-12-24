@@ -1,0 +1,3 @@
+bool soft_emergency_triggered
+bool hard_emergency_triggered
+bool amr_emergency_triggered

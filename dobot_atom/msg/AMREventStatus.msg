@@ -1,0 +1,5 @@
+bool emergency_stop_pressed
+bool enable_pressed
+bool path_blocked
+bool low_battery
+bool obstacle_detected

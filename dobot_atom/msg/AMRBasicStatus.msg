@@ -1,0 +1,4 @@
+float32 battery_level
+float32 battery_voltage
+float32 battery_current
+uint16 heartbeat

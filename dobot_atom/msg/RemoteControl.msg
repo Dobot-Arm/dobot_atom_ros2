@@ -1,0 +1,2 @@
+JoystickValue btn_move
+JoystickValue btn_turn

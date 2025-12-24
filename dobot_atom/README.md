@@ -80,6 +80,15 @@ float32[3] rpy          # 欧拉角（滚转、俯仰、偏航）
 uint8 temperature       # 温度传感器数据
 ```
 
+#### JoystickValue.msg
+
+摇杆值信息
+
+```
+float32 x   # x轴值 [-1, 1]
+float32 y   # y轴值 [-1, 1]
+```
+
 ### 控制接口消息
 
 #### SetFsmId.msg
@@ -87,7 +96,8 @@ uint8 temperature       # 温度传感器数据
 切换底层状态
 
 ```
-uint16 id  # 对应算法状态机ID
+uint16 id               # 对应算法状态机ID
+string current_action   # 算法当前正在执行的动作
 ```
 
 #### SwitchUpperControl.msg
@@ -105,9 +115,10 @@ bool flag  # true: 上肢有控制，false: 上肢无控制
 上肢状态信息
 
 ```
-string[16] robot_type           # 对应产品定义的类型
+char[16] robot_type             # 对应产品定义的类型
 bool is_upper_control           # 上肢控制状态
 uint16 fsm_id                   # 对应算法状态机
+IMUState imu_state              # IMU状态
 MotorState[17] motor_state      # 17个电机状态
 BmsState bms_state              # 电池状态
 uint8[40] wireless_remote       # 手柄键值
@@ -154,6 +165,72 @@ uint32 reserve                  # 越疆保留
 MotorCmd[12] motor_cmd  # 12个电机命令
 ```
 
+### 轮式底盘(AMR)相关消息
+
+#### AMRState.msg
+
+底盘状态信息
+
+```
+# NavigationStatus constants
+uint8 NAV_UNKNOWN=0
+# ... (其他状态常量)
+
+# DeviceStatus constants
+uint8 DEV_UNKNOWN=0
+# ... (其他状态常量)
+
+uint8 device_status             # 设备状态
+uint8 navigation_status         # 导航状态
+AMRBasicStatus basic_status     # 基础状态
+float32[3] position             # 当前位置 {x,y,yaw}
+AMREventStatus amr_event        # 底盘相关事件
+uint32[32] error_code           # 错误码
+uint32 task_id                  # 任务ID
+uint32 work_mode                # 机器人工作模式
+```
+
+#### AMRCommand.msg
+
+底盘控制命令
+
+```
+# AMR Command Types
+uint8 CANCEL_TASK=0
+# ... (其他命令常量)
+
+uint8 command_type              # 命令类型
+uint32 target_id                # 目标ID
+float32 linear_vel              # 线速度
+float32 angular_vel             # 角速度
+uint32 command_id               # 命令ID
+uint64 timestamp                # 时间戳
+float32 theta                   # 角度
+```
+
+#### AMRBasicStatus.msg
+
+底盘基础状态
+
+```
+float32 battery_level           # 电池电量
+float32 battery_voltage         # 电池电压
+float32 battery_current         # 电池电流
+uint16 heartbeat                # 心跳值
+```
+
+#### AMREventStatus.msg
+
+底盘事件状态
+
+```
+bool emergency_stop_pressed     # 急停按钮
+bool enable_pressed             # 使能键
+bool path_blocked               # 路径被挡
+bool low_battery                # 电量低
+bool obstacle_detected          # 检测到障碍物
+```
+
 ### 系统状态消息
 
 #### AxisStateInfo.msg
@@ -193,6 +270,10 @@ uint16 software_version     # 软件版本
 
 ```
 AxisStateInfo[12] leg       # 12个腿部关节状态
+AxisStateInfo[7] left_arm   # 左臂状态
+AxisStateInfo[7] right_arm  # 右臂状态
+AxisStateInfo waist         # 腰部状态
+AxisStateInfo[2] head       # 头部状态
 EcatSlaveInfo[2] ecat2can   # 2个EtherCAT转CAN模块状态
 ```
 
@@ -202,6 +283,16 @@ EcatSlaveInfo[2] ecat2can   # 2个EtherCAT转CAN模块状态
 
 ```
 int32 msgid  # 消息ID（任意值）
+```
+
+#### EmergencyState.msg
+
+急停状态信息
+
+```
+bool soft_emergency_triggered   # 软急停 (app触发)
+bool hard_emergency_triggered   # 硬急停 (用户板触发)
+bool amr_emergency_triggered    # AMR急停 (底盘触发)
 ```
 
 ### 灵巧手消息
@@ -222,6 +313,17 @@ MotorState[12] hands  # 12个手指电机状态
 MotorCmd[12] hands  # 12个手指电机命令
 ```
 
+### 遥控消息
+
+#### RemoteControl.msg
+
+摇杆控制信息
+
+```
+JoystickValue btn_move    # 左旋钮键值
+JoystickValue btn_turn    # 右旋钮键值
+```
+
 ## 话题映射
 
 | 话题名称                    | 消息类型           | 功能描述         |
@@ -232,10 +334,14 @@ MotorCmd[12] hands  # 12个手指电机命令
 | `rt/upper/cmd`            | UpperCmd           | 上肢控制命令     |
 | `rt/lower/state`          | LowerState         | 下肢状态信息     |
 | `rt/lower/cmd`            | LowerCmd           | 下肢控制命令     |
+| `rt/amr/state`            | AMRState           | 轮式底盘状态     |
+| `rt/amr/cmd`              | AMRCommand         | 轮式底盘控制     |
 | `rt/main/nodes/state`     | MainNodesState     | 关节和CAN板状态  |
 | `rt/clear/errors`         | ClearErrors        | 清除错误         |
 | `rt/hands/state`          | HandsState         | 灵巧手状态       |
 | `rt/hands/cmd`            | HandsCmd           | 灵巧手控制命令   |
+| `rt/remote/control`       | RemoteControl      | 摇杆控制         |
+| `rt/emergency/state`      | EmergencyState     | 急停状态         |
 
 ## 使用说明
 
@@ -268,13 +374,20 @@ MotorCmd[12] hands  # 12个手指电机命令
 - 大拇指弯曲角度：-13°~53.6°（-0.2269rad~0.9346rad）
 - 大拇指旋转角度：90°~165°（1.5708rad~2.8798rad）
 
-**角速度范围：**
+### 4. 轮式底盘(AMR)使用
 
-- 小指、无名指、中指、食指：最大3.3474 rad/s
-- 大拇指弯曲角度：最大1.4519 rad/s
-- 大拇指旋转角度：最大1.6363 rad/s
+#### 遥控功能
+1. 发送 `START_REMOTE` 请求。
+2. 发送 `REMOTE_CONTROL` 请求，设置 `linear_vel` 和 `angular_vel`。
+3. 结束时发送 `STOP_REMOTE` 请求。
 
-### 4. 实时话题标识
+#### 导航功能
+1. 发送 `MOVE_TO_TAG` 请求，设置 `target_id` 和 `theta`。
+2. 通过 `AMRState` 中的 `navigation_status` 判断任务状态：
+   - `RUNNING (2)`: 运行中
+   - `COMPLETED (3)`: 已完成
+
+### 5. 实时话题标识
 
 所有需要实时发布的话题均以 `rt/` 开头。
 
@@ -289,6 +402,7 @@ source install/setup.bash
 
 ## 依赖项
 
-- ROS2 (Humble/Iron/Rolling)geometry_msgs
+- ROS2 (Humble/Iron/Rolling)
+- geometry_msgs
 - rosidl_default_generators
 - rosidl_generator_dds_idl

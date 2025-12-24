@@ -1,9 +1,19 @@
-# AMR Command Types
-uint8 CANCEL_TASK = 0
-uint8 PAUSE_TASK = 1
-uint8 RESUME_TASK = 2
-uint8 MOVE_TO_TAG = 3
-uint8 REMOTE_CONTROL = 4
+uint8 CANCEL_TASK=0
+uint8 PAUSE_TASK=1
+uint8 RESUME_TASK=2
+uint8 MOVE_TO_TAG=3
+uint8 REMOTE_CONTROL=4
+uint8 ROTATE=5
+uint8 START_REMOTE=6
+uint8 STOP_REMOTE=7
+uint8 SUBSCRIBE_LASER=8
+uint8 UNSUBSCRIBE_LASER=9
+uint8 START_MAPPING=10
+uint8 SAVE_MAP=11
+uint8 STOP_MAPPING=12
+uint8 SET_VEL=13
+uint8 SET_ACCEL=14
+uint8 SET_DECEL=15
 
 uint8 command_type
 uint32 target_id
@@ -11,3 +21,4 @@ float32 linear_vel
 float32 angular_vel
 uint32 command_id
 uint64 timestamp
+float32 theta
