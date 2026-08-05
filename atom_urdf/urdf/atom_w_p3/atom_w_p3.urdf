@@ -610,7 +610,7 @@
     <child
       link="left_shoulder_roll_Link" />
     <axis
-      xyz="0 1 0" />
+      xyz="1 0 0" />
     <limit
       lower="-0.43"
       upper="3.14"

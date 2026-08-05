@@ -7,7 +7,7 @@
 ## 包信息
 
 - **包名**: dobot_atom
-- **版本**: 1.0.0
+- **版本**: 1.2.0.0-beta8
 - **维护者**: futingxing<futingxing@dobot_robots.com>
 
 ## 消息类型
@@ -96,8 +96,13 @@ float32 y   # y轴值 [-1, 1]
 切换底层状态
 
 ```
+# WorkingState constants
+uint8 HIDLE=0           # 空闲状态
+uint8 HTASKING=1        # 任务状态
+
 uint16 id               # 对应算法状态机ID
 string current_action   # 算法当前正在执行的动作
+uint8 state             # 工作状态 (HIDLE/HTASKING)
 ```
 
 #### SwitchUpperControl.msg
@@ -249,21 +254,38 @@ MotorCmd[12] motor_cmd  # 12个电机命令
 
 ```
 # NavigationStatus constants
-uint8 NAV_UNKNOWN=0
-# ... (其他状态常量)
+uint8 UNKNOWN=0
+uint8 QUEUING=1
+uint8 RUNNING=2
+uint8 COMPLETED=3
+uint8 FAILED=4
+uint8 PAUSED=5
+uint8 CANCELED=6
+uint8 WAITING_CONFIRM=7
+uint8 IDLE=8
+uint8 STOPPED=9
 
 # DeviceStatus constants
-uint8 DEV_UNKNOWN=0
-# ... (其他状态常量)
+uint8 DEVUNKNOWN=0
+uint8 DEVIDLE=1
+uint8 TASKING=2
+uint8 ERROR=3
+uint8 OFFLINE=4
+uint8 INIT=5
+uint8 CHARGING=6
+uint8 UPGRADE=7
 
 uint8 device_status             # 设备状态
 uint8 navigation_status         # 导航状态
 AMRBasicStatus basic_status     # 基础状态
 float32[3] position             # 当前位置 {x,y,yaw}
+Velocity velocity               # 实时速度
 AMREventStatus amr_event        # 底盘相关事件
 uint32[32] error_code           # 错误码
 uint32 task_id                  # 任务ID
 uint32 work_mode                # 机器人工作模式
+uint32 relocate_state           # 重定位状态
+uint32 map_switch_state         # 地图切换状态
 ```
 
 #### AMRCommand.msg
@@ -273,7 +295,25 @@ uint32 work_mode                # 机器人工作模式
 ```
 # AMR Command Types
 uint8 CANCEL_TASK=0
-# ... (其他命令常量)
+uint8 PAUSE_TASK=1
+uint8 RESUME_TASK=2
+uint8 MOVE_TO_TAG=3
+uint8 MOVE_TO_CHARGE=4
+uint8 REMOTE_CONTROL=5
+uint8 ROTATE=6
+uint8 START_REMOTE=7
+uint8 STOP_REMOTE=8
+uint8 SUBSCRIBE_LASER=9
+uint8 UNSUBSCRIBE_LASER=10
+uint8 START_MAPPING=11
+uint8 SAVE_MAP=12
+uint8 STOP_MAPPING=13
+uint8 SET_VEL=14
+uint8 SET_ACCEL=15
+uint8 SET_DECEL=16
+uint8 CANCEL_CHARGE=17
+uint8 SWITCH_MAP=18
+uint8 RELOCATE=19
 
 uint8 command_type              # 命令类型
 uint32 target_id                # 目标ID
@@ -305,6 +345,15 @@ bool enable_pressed             # 使能键
 bool path_blocked               # 路径被挡
 bool low_battery                # 电量低
 bool obstacle_detected          # 检测到障碍物
+```
+
+#### Velocity.msg
+
+速度信息
+
+```
+float32 linear_vel      # 线速度
+float32 angular_vel     # 角速度
 ```
 
 ### 系统状态消息
@@ -369,6 +418,7 @@ int32 msgid  # 消息ID（任意值）
 bool soft_emergency_triggered   # 软急停 (app触发)
 bool hard_emergency_triggered   # 硬急停 (用户板触发)
 bool amr_emergency_triggered    # AMR急停 (底盘触发)
+bool di_emergency_triggered     # DI急停触发
 ```
 
 ### 灵巧手消息
@@ -470,9 +520,14 @@ JoystickValue btn_turn    # 右旋钮键值
 
 #### 导航功能
 1. 发送 `MOVE_TO_TAG` 请求，设置 `target_id` 和 `theta`。
-2. 通过 `AMRState` 中的 `navigation_status` 判断任务状态：
+2. 发送 `MOVE_TO_CHARGE` 请求，控制底盘前往充电桩。
+3. 发送 `CANCEL_CHARGE` 请求，取消充电任务。
+4. 发送 `SWITCH_MAP` 请求，切换导航地图。
+5. 发送 `RELOCATE` 请求，触发重定位。
+6. 通过 `AMRState` 中的 `navigation_status` 判断任务状态：
    - `RUNNING (2)`: 运行中
    - `COMPLETED (3)`: 已完成
+7. 使用 `CANCEL_TASK` / `PAUSE_TASK` / `RESUME_TASK` 控制任务生命周期。
 
 ### 6. 实时话题标识
 
