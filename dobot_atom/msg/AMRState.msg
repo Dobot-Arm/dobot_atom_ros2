@@ -22,6 +22,7 @@ uint8 device_status
 uint8 navigation_status
 AMRBasicStatus basic_status
 float32[3] position
+Velocity velocity
 AMREventStatus amr_event
 uint32[32] error_code
 uint32 task_id

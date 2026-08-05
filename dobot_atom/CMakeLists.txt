@@ -35,6 +35,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         "msg/LowerState.msg"
         "msg/UpperCmd.msg"
         "msg/UpperState.msg"
+        "msg/Velocity.msg"
         "msg/AxisStateInfo.msg"
         "msg/EcatSlaveInfo.msg"
         "msg/MainNodesState.msg"
